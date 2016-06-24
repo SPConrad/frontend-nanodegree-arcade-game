@@ -1,10 +1,11 @@
 // Enemies our player must avoid
 var Enemy = function(x, y) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
-
+    ///set the x and y to the passed in numbers
     this.xStart = x;
-    this.yStart = y;
+    this.yStart = y;    
+
+    this.sprite = 'images/enemy-bug.png';    
+    this.speed = 0;
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
@@ -14,11 +15,11 @@ var Enemy = function(x, y) {
 Enemy.prototype.init = function(){
     this.x = this.xStart; 
     this.y = this.yStart;
-    this.sprite = 'images/enemy-bug.png';
     this.speed = Math.floor((Math.random() * 400) + 150);
 }
 
 Enemy.prototype.reset = function(){
+    ///reset location and speed
     this.init();
 }
 
@@ -30,6 +31,9 @@ Enemy.prototype.update = function(dt) {
     // all computers.
     this.x += this.speed * dt;
 
+    ///once it reachs a certain position off screen, reset it 
+    ///I believe the 1000 position gives it enough time off screen
+    ///for enjoyable gameplay
     if (this.x >= 1000){
         this.init();
     }
@@ -48,84 +52,88 @@ var Player = function() {
     this.width = 101;
     this.winner = false;
 
+    ///start at the bottom middle. these could be set to variables for randomized
+    ///starts and/or variably sized grids
     this.xStart = 202;
     this.yStart = 404;
 
 
     ///amount to move player on X or Y axis
-    this.moveX = 0;
-    this.moveY = 0;
+    this.targetX = 0;
+    this.targetY = 0;
 
-    this.speed = 4;
+    ///speed at which to move the player
+    this.speed = 300;
 
 
     ///starting position, bottom middle
     this.x = this.xStart;
-    this.y = this.yStart; ///404
+    this.y = this.yStart;
 
 }
 
 Player.prototype.update = function(dt) {    
     ///get amount to move from the handleInput
-    ///over deltaTime move the player up that amount in a smooth fashion
-    if (this.moveX > 0){
+    ///over deltaTime move the player that amount in a smooth fashion
+    var moveSpeed = parseInt(this.speed * dt);
+    //moveSpeed = moveSpeed.toFixed(4);
+    if (this.targetX > this.x){
         if (this.x >= 400){
-            this.moveX = 0;
+            ///don't move if at last tile
+            this.targetX = 0;
         } else {
-            this.x += parseInt(this.speed);
-            this.moveX -= parseInt(this.speed);
-        }
-        
-    } else if (this.moveX < 0){
+            this.x += moveSpeed;
+        }        
+    } else if (this.targetX < this.x){
         if (this.x <= 2){
-            this.moveX = 0;
+            ///don't move if at last tile
+            this.targetX = 0;
         } else {
-            this.x -= parseInt(this.speed);
-            this.moveX += parseInt(this.speed);
-            console.log(this.x);
+            this.x -= moveSpeed;
         }
     }
 
-    if (this.moveY > 0)    {
+    if (this.targetY > this.y)    {
         if (this.y >= 404){
-            this.moveY = 0;
+            ///don't move if at last tile
+            this.targetY = 0;
         } else {
-            this.y += parseInt(this.speed);
-            this.moveY -= parseInt(this.speed);
-        }
-        
-    } else if (this.moveY < 0){
-        this.y -= parseInt(this.speed);
-        this.moveY += parseInt(this.speed)
+            this.y += moveSpeed;
+        }        
+    } else if (this.targetY < this.y){
+        ///don't need a last tile check as the game will default to win state
+        this.y -= moveSpeed;
         }
 
     if (this.y < -10)
     {
+        ///at the top, set win condition to true
         this.winner = true;
     }
 
-
+    
     ///reduces possibility where value is +-1 and changing by more than +-1,
-    ///stuck in a jittery loop of unendingness 
-    if (this.moveX <= 1 && this.moveX >= -1)
+    ///stuck in a jittery loop of unendingness        
+    if ((this.x + moveSpeed) > this.targetX && (this.x - moveSpeed) < this.targetX)
     {
-        this.moveX = 0;
+        this.x = this.targetX;
     }
 
-    if (this.moveY <= 1 && this.moveY >= -1)
+    if ((this.y + moveSpeed) > this.targetY && (this.y - moveSpeed) < this.targetY)
     {
-        this.moveY = 0;
+        //console.log("this.y:" + this.y + "  this.targetY:" + this.targetY + "  moveSpeed: " + moveSpeed);
+        this.y = this.targetY;
     }
-
 };
 
 Player.prototype.reset = function(){
-    ///set move to 0    
-    this.moveX = 0;
-    this.moveY = 0;
     ///set position to start position
     this.x = this.xStart;
     this.y = this.yStart;
+
+    ///set move to 0    
+    this.targetX = this.x;
+    this.targetY = this.y;
 }
 
 Player.prototype.render = function() {
@@ -135,23 +143,21 @@ Player.prototype.render = function() {
 
 Player.prototype.handleInput = function(input){
     //width and height of each grid block
-    var blockVertical = 84;
-    var blockHorizontal = 100;
-    if ((this.moveX == 0) && (this.moveY == 0))
-    {
+    var blockVertical = 83;
+    var blockHorizontal = 101;
         switch (input)
         {
             case "up":
-                this.moveY = -blockVertical;   
+                this.targetY -= blockVertical;   
                 break;
-            case "down":        
-                this.moveY = blockVertical;
+            case "down":     
+                this.targetY += blockVertical;
                 break;
             case "left":
-                this.moveX = -blockHorizontal;
+                this.targetX -= blockHorizontal;
                 break;
             case "right":
-                this.moveX = blockHorizontal;
+                this.targetX += blockHorizontal;
                 break;
 
             default: 
@@ -159,7 +165,7 @@ Player.prototype.handleInput = function(input){
                 break;
 
         }
-    }
+    
 };
 
 

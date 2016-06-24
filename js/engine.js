@@ -25,9 +25,10 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime,
         winner,
-        wintTimer,
+        winTimer,
         winScreenTimeOut;
 
+        ///initialize variables
         winScreenTimeOut = 3; 
         winTimer = 0;
         winner = false;
@@ -85,14 +86,17 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
+        ///winner is set in the player object, check it on every loop
         winner = player.winner;
         if (!winner)
         {
+            ///continue as normal if user has not won
             updateEntities(dt);
             checkCollisions();
         } else if (winner) {
             if ((winTimer += dt) < winScreenTimeOut){
-                console.log(winTimer);
+                ///win timer is 3 seconds, count up and then reset
+
                 ctx.font = "36pt Impact";
                 ctx.textAlign = "center";
 
@@ -106,11 +110,13 @@ var Engine = (function(global) {
                 ctx.strokeText("WINNER!", canvas.width / 2, 40);
 
             } else {
-                console.log("reset");
+                ///after 3 seconds, reset the game
                 winTimer = 0;
                 player.winner = false;
                 winner = false;
+                ///clear the winner message
                 ctx.clearRect(0, 0, 500, 500);
+                ///add another 3 enemies to increase difficulty
                 addEnemies(3);
                 init();
             }
@@ -123,10 +129,11 @@ var Engine = (function(global) {
      */
     function checkCollisions() {
         allEnemies.forEach(function(enemy) {
-            if (enemy.x > player.x - 85
-                && enemy.x < player.x + 85
-                && enemy.y > player.y - 85
-                && enemy.y < player.y + 20){
+            ///check for collision with the player near each enemy
+            if (enemy.x > player.x - 60
+                && enemy.x < player.x + 60
+                && enemy.y > player.y - 60
+                && enemy.y < player.y + 60){
                     //reset the game   
                 reset();
             }
