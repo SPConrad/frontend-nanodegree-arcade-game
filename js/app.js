@@ -15,6 +15,7 @@ var Enemy = function(x, y) {
 Enemy.prototype.init = function(){
     this.x = this.xStart; 
     this.y = this.yStart;
+    ///set the speed to a random number between 150 and 550 (pretty slow and pretty fast)
     this.speed = Math.floor((Math.random() * 400) + 150);
 }
 
@@ -76,7 +77,7 @@ Player.prototype.update = function(dt) {
     ///get amount to move from the handleInput
     ///over deltaTime move the player that amount in a smooth fashion
     var moveSpeed = parseInt(this.speed * dt);
-    //moveSpeed = moveSpeed.toFixed(4);
+
     if (this.targetX > this.x){
         if (this.x >= 400){
             ///don't move if at last tile
@@ -112,8 +113,8 @@ Player.prototype.update = function(dt) {
     }
 
     
-    ///reduces possibility where value is +-1 and changing by more than +-1,
-    ///stuck in a jittery loop of unendingness        
+    ///if moving the player again would cause it to overshoot the target, simply set 
+    ///it to the target position   
     if ((this.x + moveSpeed) > this.targetX && (this.x - moveSpeed) < this.targetX)
     {
         this.x = this.targetX;
@@ -121,7 +122,7 @@ Player.prototype.update = function(dt) {
 
     if ((this.y + moveSpeed) > this.targetY && (this.y - moveSpeed) < this.targetY)
     {
-        //console.log("this.y:" + this.y + "  this.targetY:" + this.targetY + "  moveSpeed: " + moveSpeed);
+        
         this.y = this.targetY;
     }
 };
@@ -131,7 +132,7 @@ Player.prototype.reset = function(){
     this.x = this.xStart;
     this.y = this.yStart;
 
-    ///set move to 0    
+    ///set move to current positon  
     this.targetX = this.x;
     this.targetY = this.y;
 }
@@ -145,6 +146,9 @@ Player.prototype.handleInput = function(input){
     //width and height of each grid block
     var blockVertical = 83;
     var blockHorizontal = 101;
+    ///if a valid input is entered and user is not alread moving, target the next block
+    if (this.targetX == this.x && this.targetY == this.y)
+    {
         switch (input)
         {
             case "up":
@@ -165,7 +169,7 @@ Player.prototype.handleInput = function(input){
                 break;
 
         }
-    
+    }
 };
 
 
@@ -184,14 +188,16 @@ var rowOffset = 60;
 
 var addEnemies = function(numOfEnemies){
 for (var i = 0; i < numOfEnemies; i++){
+    ///one for each "road" row
     var yStart = rowHeight * (i % 3) + rowOffset;
+    ///start each one a little further off the road to stagger their appearance 
     enemyXStart -= 100;
     var bufferEnemy = new Enemy(enemyXStart, yStart);
     allEnemies.push(bufferEnemy);
     }
 }
-
 addEnemies(startNumOfEnemies);
+
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
