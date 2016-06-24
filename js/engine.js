@@ -23,11 +23,17 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
-        lastTime;
+        lastTime,
+        winner,
+        wintTimer,
+        winScreenTimeOut;
 
-    canvas.width = 505;
-    canvas.height = 606;
-    doc.body.appendChild(canvas);
+        winScreenTimeOut = 3; 
+        winTimer = 0;
+        winner = false;
+        canvas.width = 505;
+        canvas.height = 606;
+        doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
@@ -79,10 +85,56 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
-        updateEntities(dt);
-        // checkCollisions();
+        winner = player.winner;
+        if (!winner)
+        {
+            updateEntities(dt);
+            checkCollisions();
+        } else if (winner) {
+            if ((winTimer += dt) < winScreenTimeOut){
+                console.log(winTimer);
+                ctx.font = "36pt Impact";
+                ctx.textAlign = "center";
+
+                ctx.fillStyle = "white";
+
+                ctx.fillText("WINNER!", canvas.width / 2, 40);
+
+                
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = 3;
+                ctx.strokeText("WINNER!", canvas.width / 2, 40);
+
+            } else {
+                console.log("reset");
+                winTimer = 0;
+                player.winner = false;
+                winner = false;
+                ctx.clearRect(0, 0, 500, 500);
+                addEnemies(3);
+                init();
+            }
+            
+        }
     }
 
+    /* This function checks for collisions. If the player and an enemy 
+     * occupy the same square, the game resets
+     */
+    function checkCollisions() {
+        allEnemies.forEach(function(enemy) {
+            if (enemy.x > player.x - 85
+                && enemy.x < player.x + 85
+                && enemy.y > player.y - 85
+                && enemy.y < player.y + 20){
+                    //reset the game   
+                reset();
+            }
+
+        })
+    }
+
+  
     /* This is called by the update function and loops through all of the
      * objects within your allEnemies array as defined in app.js and calls
      * their update() methods. It will then call the update function for your
@@ -94,7 +146,7 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        player.update();
+        player.update(dt);
     }
 
     /* This function initially draws the "game level", it will then call
@@ -116,7 +168,7 @@ var Engine = (function(global) {
                 'images/grass-block.png'    // Row 2 of 2 of grass
             ],
             numRows = 6,
-            numCols = 5,
+            numCols = 5, 
             row, col;
 
         /* Loop through the number of rows and columns we've defined above
@@ -154,12 +206,15 @@ var Engine = (function(global) {
         player.render();
     }
 
-    /* This function does nothing but it could have been a good place to
-     * handle game reset states - maybe a new game menu or a game over screen
-     * those sorts of things. It's only called once by the init() method.
-     */
-    function reset() {
-        // noop
+     /* Reset function to return game to starting position when player is hit
+     * or when player reaches the end and wins
+     */ 
+    function reset(){
+        ///run through reset functions for each entity         
+        allEnemies.forEach(function(enemy) {
+            enemy.reset();
+        })
+        player.reset();
     }
 
     /* Go ahead and load all of the images we know we're going to need to
