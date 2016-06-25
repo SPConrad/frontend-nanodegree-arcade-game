@@ -1,6 +1,9 @@
 frontend-nanodegree-arcade-game
 ===============================
 
-Students should use this [rubric](https://review.udacity.com/#!/projects/2696458597/rubric) for self-checking their submission.
+Step 1: Clone, Fork, or Download the repository
+Step 2: Open the index.html file
+Step 3: After game loads, move with up, down, left, and right arrow keys
 
-For detailed instructions on how to get started, check out this [guide](https://docs.google.com/document/d/1v01aScPjSWCCWQLIpFqvg3-vXLH2e8_SZQKC8jNO0Dc/pub?embedded=true).
+Win the game by reaching the water, if a bug hits you the game will reset and you have to start over!
+
